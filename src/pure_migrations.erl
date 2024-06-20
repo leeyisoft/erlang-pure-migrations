@@ -41,16 +41,16 @@ do_migration(_Path, _FQuery, Error) -> Error.
 
 find_migrations(ScriptsLocation, FQuery) ->
     compose(
-      fun() -> file:list_dir_all(ScriptsLocation) end,
+      fun() -> filelib:wildcard("*.sql", ScriptsLocation) end,
       fun(Files) -> filter_script_files(Files, ScriptsLocation, FQuery) end).
 
-filter_script_files({ok, Files}, _Folder, FQuery) ->
+filter_script_files([], Folder, _FQuery) ->
+    [{error, invalid_folder, {folder_supplied, Folder, error, ""}}];
+filter_script_files(Files, _Folder, FQuery) when is_list(Files) ->
     MigrationsDone = sets:from_list(FQuery(db_dialect:migrations_done())),
     lists:filter(
       fun(N) -> not sets:is_element(N, MigrationsDone) end,
-      lists:keysort(1, [version_and_filename(F) || F <- Files]));
-filter_script_files(Error, Folder, _FQuery)->
-    [{error, invalid_folder, {folder_supplied, Folder, error, Error}}].
+      lists:keysort(1, [version_and_filename(F) || F <- Files])).
 
 version_and_filename(F) ->
     case string:to_integer(F) of
