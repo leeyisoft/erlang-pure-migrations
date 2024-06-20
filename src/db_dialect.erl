@@ -9,7 +9,7 @@
 init() ->
     "CREATE TABLE IF NOT EXISTS database_migrations_history (
     version INTEGER NOT NULL PRIMARY KEY,
-    filename TEXT NOT NULL,
+    filename varchar(255) NOT NULL,
     creation_timestamp TIMESTAMP NOT NULL DEFAULT NOW()
         )".
 
